@@ -1,0 +1,19 @@
+{
+  "name": "ระบบห้องพยาบาล โรงเรียนวิสุทธิกษัตรี",
+  "short_name": "ห้องพยาบาล ว.ก.",
+  "description": "ระบบจัดเก็บข้อมูลและสถิติห้องพยาบาล โรงเรียนวิสุทธิกษัตรี อำเภอพระประแดง จังหวัดสมุทรปราการ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1d4ed8",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/logo.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
