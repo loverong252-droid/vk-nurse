@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบห้องพยาบาล โรงเรียนวิสุทธิกษัตรี จ.สมุทรปราการ</title>
+  <link rel="stylesheet" href="assets/app.css">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1d4ed8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ห้องพยาบาล ว.ก.">
+</head>
+<body>
+
+  <!-- ========================================================================
+       LOGIN OVERLAY (หน้าต่างเข้าสู่ระบบ Admin / 1234)
+       ======================================================================== -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card" id="loginCard">
+      <div class="login-header">
+        <div class="login-logo-wrap">
+          <img src="assets/logo.jpg" alt="ตราโรงเรียนวิสุทธิกษัตรี" class="login-logo">
+        </div>
+        <h2>เข้าสู่ระบบห้องพยาบาล</h2>
+        <div class="login-school">โรงเรียนวิสุทธิกษัตรี จ.สมุทรปราการ</div>
+        <div class="login-motto">"นตฺถิ ปญฺญา สมา อาภา"</div>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div id="loginErrorMsg" class="login-error-alert" style="display:none;">
+          <span>⚠️</span>
+          <span>ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง โปรดลองอีกครั้ง</span>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label" for="loginUsername">
+            <span>👤 ชื่อผู้ใช้งาน (Username)</span>
+          </label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="กรอกชื่อผู้ใช้งาน" required autocomplete="username" autofocus>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label" for="loginPassword">
+            <span>🔑 รหัสผ่าน (Password)</span>
+          </label>
+          <div class="input-password-wrapper">
+            <input type="password" id="loginPassword" class="form-control" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password">
+            <button type="button" class="btn-toggle-pw" id="btnTogglePassword" title="แสดง/ซ่อนรหัสผ่าน">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg mt-4" style="width: 100%;">
+          🔐 เข้าสู่ระบบห้องพยาบาล
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       Header Bar (พร้อมโลโก้โรงเรียนที่มุมขวาบน)
+       ======================================================================== -->
+  <header class="header-bar">
+    <div class="header-container">
+      
+      <!-- ฝั่งซ้าย: ข้อมูลโรงเรียนและระบบ -->
+      <div class="header-left">
+        <div class="school-badge-icon">
+          🏥
+        </div>
+        <div class="school-title-group">
+          <h1>
+            ระบบจัดเก็บข้อมูลและสถิติห้องพยาบาล
+            <span class="sub-title-tag">โรงเรียนวิสุทธิกษัตรี</span>
+          </h1>
+          <div class="school-subtitle">
+            <span>โรงเรียนวิสุทธิกษัตรี อำเภอพระประแดง จังหวัดสมุทรปราการ</span>
+            <span class="school-motto">"นตฺถิ ปญฺญา สมา อาภา" (ไม่มีแสงสว่างใด เสมอด้วยปัญญา)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ฝั่งขวา: โลโก้โรงเรียนมุมขวาบน (ตามข้อกำหนดของผู้ใช้), นาฬิกา และผู้ใช้ที่ล็อกอิน -->
+      <div class="header-right">
+        <!-- สถานะ Cloudflare D1 -->
+        <div class="cloud-status-badge" id="cloudStatusBadge" title="สถานะคลาวด์ Cloudflare D1">
+          <span class="status-dot" id="cloudStatusDot"></span>
+          <span id="cloudStatusText">ตรวจคลาวด์...</span>
+        </div>
+        <!-- ปุ่มติดตั้งแอพ Desktop -->
+        <button type="button" class="btn-install-app" id="btnInstallApp" style="display:none;" title="ติดตั้งเป็นแอปพลิเคชันบนเดสก์ท็อป">
+          📲 ติดตั้งแอพ
+        </button>
+        <div class="user-profile-badge" id="headerUserBadge" style="display:none;">
+          <span>👤 ผู้ใช้: <strong id="headerUserName">Admin</strong></span>
+          <button type="button" class="btn-logout" id="btnLogout" title="ออกจากระบบ">🚪 ออกจากระบบ</button>
+        </div>
+        <div class="clock-card">
+          <div class="clock-time" id="headerClockTime">--:--:-- น.</div>
+          <div class="clock-date" id="headerClockDate">--</div>
+        </div>
+        <div class="school-logo-frame" title="ตราสัญลักษณ์ โรงเรียนวิสุทธิกษัตรี จ.สมุทรปราการ">
+          <img src="assets/logo.jpg" alt="ตราโรงเรียนวิสุทธิกษัตรี" class="school-logo-img">
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Navigation Bar
+       ======================================================================== -->
+  <nav class="nav-tabs-wrapper no-print">
+    <div class="nav-container">
+      <button class="tab-btn active" data-target="entry">
+        <span>📝 บันทึกการรับบริการใหม่</span>
+      </button>
+      <button class="tab-btn" data-target="records">
+        <span>📋 ทะเบียนประวัติและรายการ</span>
+        <span class="tab-badge" id="recordCountBadge">0 รายการ</span>
+      </button>
+      <button class="tab-btn" data-target="stats">
+        <span>📊 สถิติและรายงานสรุป</span>
+      </button>
+      <button class="tab-btn" data-target="backup">
+        <span>💾 สำรองและจัดการข้อมูล</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================================================
+       Main Content Container
+       ======================================================================== -->
+  <main class="main-wrapper no-print">
+
+    <!-- ======================================================================
+         TAB 1: แบบฟอร์มบันทึกการรับบริการห้องพยาบาล
+         ====================================================================== -->
+    <section id="entry" class="tab-pane active">
+      <div class="card">
+        <div class="card-header border-accent">
+          <div class="card-title">
+            <span>🩺 แบบฟอร์มบันทึกการเข้าใช้บริการห้องพยาบาล</span>
+          </div>
+          <span style="font-size:0.85rem;color:var(--text-muted);">
+            * โปรดกรอกข้อมูลให้ครบถ้วนเพื่อความถูกต้องของสถิติ
+          </span>
+        </div>
+
+        <div class="card-body">
+          <form id="visitForm">
+            
+            <div class="form-grid">
+              
+              <!-- วันที่และเวลาที่มารับบริการ -->
+              <div class="col-4">
+                <div class="form-group">
+                  <label class="form-label" for="visitDatetime">
+                    <span>📅 วันที่และเวลา</span>
+                    <span class="required">*</span>
+                  </label>
+                  <input type="datetime-local" id="visitDatetime" class="form-control" required>
+                </div>
+              </div>
+
+              <!-- ประเภทผู้รับบริการ (นักเรียน หรือ บุคลากร) -->
+              <div class="col-4">
+                <div class="form-group">
+                  <label class="form-label">
+                    <span>👤 ประเภทผู้รับบริการ</span>
+                    <span class="required">*</span>
+                  </label>
+                  <div class="type-segmented-control">
+                    <label class="type-option">
+                      <input type="radio" name="userType" value="student" checked>
+                      <span>🎒 นักเรียน</span>
+                    </label>
+                    <label class="type-option">
+                      <input type="radio" name="userType" value="staff">
+                      <span>👔 บุคลากร / ครู</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- เพศ -->
+              <div class="col-4">
+                <div class="form-group">
+                  <label class="form-label" for="gender">
+                    <span>เพศ</span>
+                  </label>
+                  <select id="gender" class="form-select">
+                    <option value="ชาย">ชาย</option>
+                    <option value="หญิง">หญิง</option>
+                    <option value="ไม่ระบุ">ไม่ระบุ</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- ชื่อนามสกุล -->
+              <div class="col-8">
+                <div class="form-group">
+                  <label class="form-label" for="fullName">
+                    <span>ชื่อ - นามสกุล ผู้ใช้บริการ</span>
+                    <span class="required">*</span>
+                    <span class="hint">(เช่น ด.ช.สมชาย ใจดี หรือ ครูสมหญิง รักเรียน)</span>
+                  </label>
+                  <input type="text" id="fullName" class="form-control" placeholder="กรอกชื่อและนามสกุล" required autocomplete="off">
+                </div>
+              </div>
+
+              <!-- สัญญาณชีพ (Vital Signs) -->
+              <div class="col-12">
+                <div class="vitals-section">
+                  <div class="vitals-title">🩺 สัญญาณชีพ (Vital Signs) <span class="hint" style="font-weight:normal;">(กรอกเฉพาะที่วัดได้)</span></div>
+                  <div class="form-grid">
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="vitalBp">💉 ความดันโลหิต (mmHg)</label>
+                        <input type="text" id="vitalBp" class="form-control" placeholder="เช่น 120/80">
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="vitalHr">❤️ ชีพจร (ครั้ง/นาที)</label>
+                        <input type="number" id="vitalHr" class="form-control" placeholder="เช่น 80">
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="vitalSpo2">🫧 ออกซิเจนในเลือด (SpO2 %)</label>
+                        <input type="number" id="vitalSpo2" class="form-control" placeholder="เช่น 98">
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="vitalRr">🌬️ การหายใจ (ครั้ง/นาที)</label>
+                        <input type="number" id="vitalRr" class="form-control" placeholder="เช่น 18">
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="temperature">🌡️ อุณหภูมิร่างกาย (°C)</label>
+                        <input type="number" step="0.1" id="temperature" class="form-control" placeholder="เช่น 36.5">
+                      </div>
+                    </div>
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="vitalDtx">🩸 ระดับน้ำตาล (mg/dL)</label>
+                        <input type="number" id="vitalDtx" class="form-control" placeholder="เช่น 95">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- กล่องกรอกข้อมูลนักเรียน: ม.1-ม.3 (6 ห้อง) และ ม.4-ม.6 (12 ห้อง) -->
+              <div class="col-12" id="studentFieldsBox">
+                <div class="student-fields-box">
+                  <div style="font-weight:700;color:var(--primary);margin-bottom:0.75rem;font-size:0.95rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>🎓 ข้อมูลชั้นเรียนนักเรียน โรงเรียนวิสุทธิกษัตรี</span>
+                    <span style="font-size:0.8rem;font-weight:normal;color:#64748b;">(ม.1-3 มี 6 ห้อง | ม.4-6 มี 12 ห้อง)</span>
+                  </div>
+                  <div class="form-grid">
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="studentGrade">
+                          <span>ระดับชั้น</span>
+                          <span class="required">*</span>
+                        </label>
+                        <select id="studentGrade" class="form-select">
+                          <option value="ม.1">มัธยมศึกษาปีที่ 1 (ม.1)</option>
+                          <option value="ม.2">มัธยมศึกษาปีที่ 2 (ม.2)</option>
+                          <option value="ม.3">มัธยมศึกษาปีที่ 3 (ม.3)</option>
+                          <option value="ม.4">มัธยมศึกษาปีที่ 4 (ม.4)</option>
+                          <option value="ม.5">มัธยมศึกษาปีที่ 5 (ม.5)</option>
+                          <option value="ม.6">มัธยมศึกษาปีที่ 6 (ม.6)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="studentRoom">
+                          <span>ห้องเรียน</span>
+                          <span class="required">*</span>
+                        </label>
+                        <select id="studentRoom" class="form-select" required>
+                          <option value="">-- เลือกห้อง --</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="col-4">
+                      <div class="form-group">
+                        <label class="form-label" for="studentNo">
+                          <span>เลขที่</span>
+                          <span class="hint">(ถ้าทราบ)</span>
+                        </label>
+                        <input type="number" id="studentNo" class="form-control" placeholder="เช่น 15" min="1" max="60">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- กล่องกรอกข้อมูลบุคลากร -->
+              <div class="col-12" id="staffFieldsBox" style="display:none;">
+                <div class="staff-fields-box">
+                  <div style="font-weight:700;color:#854d0e;margin-bottom:0.75rem;font-size:0.95rem;">
+                    <span>👔 ข้อมูลตำแหน่ง / กลุ่มสาระการเรียนรู้</span>
+                  </div>
+                  <div class="form-grid">
+                    <div class="col-12">
+                      <div class="form-group">
+                        <label class="form-label" for="staffPosition">
+                          <span>ตำแหน่ง / แผนก / กลุ่มสาระฯ</span>
+                          <span class="required">*</span>
+                        </label>
+                        <input type="text" id="staffPosition" class="form-control" placeholder="เช่น ครูภาษาไทย, ครูวิทยาศาสตร์, เจ้าหน้าที่ธุรการ, นักการภารโรง">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- อาการเจ็บป่วย -->
+              <div class="col-12">
+                <div class="form-group">
+                  <label class="form-label" for="symptoms">
+                    <span>🩹 อาการเจ็บป่วย</span>
+                    <span class="required">*</span>
+                    <span class="hint">(คลิกปุ่มลัดด้านล่างเพื่อเลือกอาการ หรือพิมพ์เพิ่มเติม)</span>
+                  </label>
+                  <input type="text" id="symptoms" class="form-control" placeholder="ระบุอาการเจ็บป่วย" required autocomplete="off">
+                  
+                  <!-- ปุ่มลัดอาการยอดนิยม -->
+                  <div class="tag-container">
+                    <span class="quick-tag tag-secondary" data-symptom="ปวดศีรษะ">ปวดศีรษะ</span>
+                    <span class="quick-tag tag-secondary" data-symptom="ปวดท้อง">ปวดท้อง</span>
+                    <span class="quick-tag tag-secondary" data-symptom="ไข้ / ตัวร้อน">ไข้ / ตัวร้อน</span>
+                    <span class="quick-tag tag-secondary" data-symptom="เป็นลม / หน้ามืด / เวียนศีรษะ">เป็นลม / หน้ามืด / เวียนศีรษะ</span>
+                    <span class="quick-tag tag-secondary" data-symptom="แผลถลอก / บาดแผล">แผลถลอก / บาดแผล</span>
+                    <span class="quick-tag tag-secondary" data-symptom="ปวดประจำเดือน">ปวดประจำเดือน</span>
+                    <span class="quick-tag tag-secondary" data-symptom="คลื่นไส้ / อาเจียน">คลื่นไส้ / อาเจียน</span>
+                    <span class="quick-tag tag-secondary" data-symptom="เจ็บคอ / ไอ / มีน้ำมูก">เจ็บคอ / ไอ / มีน้ำมูก</span>
+                    <span class="quick-tag tag-secondary" data-symptom="ผื่นคัน / ลมพิษ / แพ้">ผื่นคัน / แพ้</span>
+                    <span class="quick-tag tag-secondary" data-symptom="ข้อเท้าพลิก / ฟกช้ำ">ข้อเท้าพลิก / ฟกช้ำ</span>
+                    <span class="quick-tag tag-secondary" data-symptom="ตาแดง / ระคายเคืองตา">ระคายเคืองตา</span>
+                    <span class="quick-tag tag-secondary" data-symptom="แมลงสัตว์กัดต่อย">แมลงสัตว์กัดต่อย</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- การรักษา / การปฐมพยาบาล -->
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="treatment">
+                    <span>🩺 การรักษา / การปฐมพยาบาล</span>
+                    <span class="hint">(คลิกปุ่มลัดเพื่อเลือก หรือพิมพ์เพิ่มเติม)</span>
+                  </label>
+                  <input type="text" id="treatment" class="form-control" placeholder="เช่น ให้นอนพักห้องพยาบาล, ทำแผล" autocomplete="off">
+                  
+                  <div class="tag-container">
+                    <span class="quick-tag tag-teal" data-treatment="ให้นอนพักห้องพยาบาล">ให้นอนพักห้องพยาบาล</span>
+                    <span class="quick-tag tag-teal" data-treatment="ทำแผล / ล้างแผล / ทายา">ทำแผล / ปฐมพยาบาล</span>
+                    <span class="quick-tag tag-secondary" data-treatment="นำส่งโรงพยาบาล">🚑 นำส่งโรงพยาบาล</span>
+                    <span class="quick-tag tag-teal" data-treatment="เช็ดตัวลดไข้">เช็ดตัวลดไข้</span>
+                    <span class="quick-tag tag-teal" data-treatment="ประคบเย็น (Cold pack)">ประคบเย็น</span>
+                    <span class="quick-tag tag-teal" data-treatment="ประคบร้อน">ประคบร้อน</span>
+                    <span class="quick-tag tag-teal" data-treatment="วัดสัญญาณชีพ / สังเกตอาการ">วัดสัญญาณชีพ</span>
+                    <span class="quick-tag tag-teal" data-treatment="ประสานงานผู้ปกครอง">ติดต่อผู้ปกครอง</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- การจ่ายยา -->
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="medication">
+                    <span>💊 การจ่ายยา</span>
+                    <span class="hint">(คลิกเลือกรายการยามาตรฐาน หรือพิมพ์ระบุ)</span>
+                  </label>
+                  <input type="text" id="medication" class="form-control" placeholder="เช่น พาราเซตามอล 500mg 1 เม็ด หรือ ไม่ได้จ่ายยา" autocomplete="off">
+                  
+                  <div class="tag-container">
+                    <span class="quick-tag" data-med="ไม่ได้จ่ายยา">ไม่ได้จ่ายยา</span>
+                    <span class="quick-tag" data-med="พาราเซตามอล 500mg">พาราเซตามอล 500mg</span>
+                    <span class="quick-tag" data-med="ยาแก้แพ้ คลอเฟนิรามีน">ยาแก้แพ้ (CPM)</span>
+                    <span class="quick-tag" data-med="ยาธาตุน้ำขาว">ยาธาตุน้ำขาว</span>
+                    <span class="quick-tag" data-med="ยาธาตุน้ำแดง">ยาธาตุน้ำแดง</span>
+                    <span class="quick-tag" data-med="ยาลดกรดชนิดเม็ด">ยาลดกรด</span>
+                    <span class="quick-tag" data-med="ผงเกลือแร่ ORS">ผงเกลือแร่ ORS</span>
+                    <span class="quick-tag" data-med="ยาหม่อง / พิมเสนน้ำ">ยาหม่อง/พิมเสน</span>
+                    <span class="quick-tag" data-med="ยาหยอดตา">ยาหยอดตา</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ผู้บันทึก -->
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="recordBy">
+                    <span>✍️ ผู้บันทึก</span>
+                    <span class="required">*</span>
+                    <span class="hint">(ระบบจะจำชื่อนี้ไว้สำหรับการบันทึกครั้งต่อไปอัตโนมัติ)</span>
+                  </label>
+                  <input type="text" id="recordBy" class="form-control" placeholder="เช่น ครูสมจิตร (ครูเวรห้องพยาบาล)" required>
+                </div>
+              </div>
+
+              <!-- บันทึกเพิ่มเติม / ข้อสังเกต -->
+              <div class="col-6">
+                <div class="form-group">
+                  <label class="form-label" for="notes">
+                    <span>📝 หมายเหตุเพิ่มเติม</span>
+                    <span class="hint">(เช่น อนุญาตให้นอนพัก 1 คาบ, แจ้งครูประจำวิชาแล้ว)</span>
+                  </label>
+                  <input type="text" id="notes" class="form-control" placeholder="ข้อสังเกตหรือคำแนะนำเพิ่มเติม">
+                </div>
+              </div>
+
+              <!-- ปุ่มกดบันทึก -->
+              <div class="col-12" style="margin-top:0.75rem;display:flex;gap:0.75rem;justify-content:flex-end;">
+                <button type="reset" class="btn btn-secondary">
+                  🔄 ล้างฟอร์ม
+                </button>
+                <button type="submit" class="btn btn-primary btn-lg">
+                  💾 บันทึกข้อมูลเข้าห้องพยาบาล
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         TAB 2: ทะเบียนประวัติและรายการบันทึก (Records & Logbook)
+         ====================================================================== -->
+    <section id="records" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋 ทะเบียนประวัติการเข้าใช้บริการห้องพยาบาล</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" id="btnExportCsv">
+              📥 ส่งออกไฟล์ Excel (CSV)
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          
+          <!-- แถบตัวกรองการค้นหา -->
+          <div class="filter-toolbar">
+            <div class="filter-group">
+              <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="tableSearch" class="form-control" placeholder="ค้นหาชื่อ, อาการ, ชั้น/ห้อง, ผู้บันทึก...">
+              </div>
+
+              <select id="filterDateRange" class="form-select" style="width:160px;">
+                <option value="all">ช่วงเวลา: ทั้งหมด</option>
+                <option value="today">เฉพาะวันนี้</option>
+                <option value="this_week">สัปดาห์นี้</option>
+                <option value="this_month">เดือนนี้</option>
+                <option value="custom">กำหนดช่วงวันที่เอง...</option>
+              </select>
+
+              <div id="customDateRange" style="display:none;align-items:center;gap:6px;">
+                <input type="date" id="filterStartDate" class="form-control" style="width:140px;">
+                <span>ถึง</span>
+                <input type="date" id="filterEndDate" class="form-control" style="width:140px;">
+              </div>
+
+              <select id="filterUserType" class="form-select" style="width:140px;">
+                <option value="all">กลุ่ม: ทั้งหมด</option>
+                <option value="student">นักเรียน</option>
+                <option value="staff">บุคลากร</option>
+              </select>
+
+              <select id="filterGrade" class="form-select" style="width:130px;">
+                <option value="all">ระดับชั้น: ทั้งหมด</option>
+                <option value="ม.1">ม.1</option>
+                <option value="ม.2">ม.2</option>
+                <option value="ม.3">ม.3</option>
+                <option value="ม.4">ม.4</option>
+                <option value="ม.5">ม.5</option>
+                <option value="ม.6">ม.6</option>
+              </select>
+            </div>
+
+            <button class="btn btn-secondary btn-sm" id="btnResetFilters">
+              ล้างตัวกรอง
+            </button>
+          </div>
+
+          <!-- ตารางแสดงรายการ -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:40px;">#</th>
+                  <th style="width:125px;">วันที่-เวลา</th>
+                  <th style="width:190px;">ผู้ใช้บริการ</th>
+                  <th style="width:130px;">ชั้น/ตำแหน่ง</th>
+                  <th>อาการเจ็บป่วย</th>
+                  <th>การรักษา / ปฐมพยาบาล</th>
+                  <th>การจ่ายยา</th>
+                  <th style="width:135px;text-align:center;">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="recordsTableBody">
+                <!-- Records rendered via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+            <div id="tableCountDisplay" style="color:var(--text-muted);font-size:0.9rem;">
+              กำลังโหลดข้อมูล...
+            </div>
+            <div class="d-flex align-center gap-2">
+              <button class="btn btn-secondary btn-sm" id="btnPrevPage">◀ หน้าก่อน</button>
+              <span id="tablePageInfo" style="font-weight:600;font-size:0.9rem;">หน้า 1 / 1</span>
+              <button class="btn btn-secondary btn-sm" id="btnNextPage">หน้าถัดไป ▶</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         TAB 3: สถิติและรายงาน (Statistics & Reports)
+         ====================================================================== -->
+    <section id="stats" class="tab-pane">
+      
+      <!-- เมนูเลือกมุมมองสถิติ (รายวัน / รายสัปดาห์ / เดือน / ปี) -->
+      <div class="stats-filter-bar">
+        <div class="d-flex align-center gap-2">
+          <span style="font-weight:700;color:var(--primary-dark);">📊 เลือกดูสถิติ:</span>
+          <div class="stats-nav">
+            <button class="stats-nav-btn" data-mode="daily">📆 สถิติรายวัน</button>
+            <button class="stats-nav-btn active" data-mode="weekly">📅 สถิติรายสัปดาห์</button>
+            <button class="stats-nav-btn" data-mode="monthly">🗓️ สถิติรายเดือน</button>
+            <button class="stats-nav-btn" data-mode="yearly">📈 สถิติรายปี</button>
+          </div>
+        </div>
+
+        <!-- ตัวเลือกวันที่สลับตามโหมด -->
+        <div class="d-flex align-center gap-2">
+          <input type="date" id="statsDatePicker" class="form-control" style="width:170px;display:none;" title="เลือกวันที่ต้องการดู">
+          <input type="date" id="statsWeekPicker" class="form-control" style="width:170px;" title="เลือกวันในสัปดาห์ที่ต้องการดู">
+          <input type="month" id="statsMonthPicker" class="form-control" style="width:170px;display:none;" title="เลือกเดือนที่ต้องการดู">
+          <select id="statsYearPicker" class="form-select" style="width:190px;display:none;"></select>
+          <button class="btn btn-primary btn-sm" id="btnPrintStatsReport">
+            🖨️ พิมพ์รายงานสรุปสถิติ
+          </button>
+        </div>
+      </div>
+
+      <!-- สรุปชื่อช่วงเวลาที่กำลังแสดงผล -->
+      <div style="margin-bottom:1rem;font-size:1.05rem;font-weight:700;color:var(--primary);">
+        สถิติห้องพยาบาล: <span id="statsPeriodTitle" style="color:var(--text-main);">กำลังประมวลผล...</span>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-icon blue">👥</div>
+          <div class="kpi-content">
+            <div class="kpi-label">ผู้ใช้บริการทั้งหมด</div>
+            <div class="kpi-value" id="kpiTotalVisits">0</div>
+            <div class="kpi-sub">รวมนักเรียนและบุคลากร</div>
+          </div>
+        </div>
+
+        <div class="kpi-card teal">
+          <div class="kpi-icon teal">🎒</div>
+          <div class="kpi-content">
+            <div class="kpi-label">นักเรียน</div>
+            <div class="kpi-value" id="kpiStudents">0</div>
+            <div class="kpi-sub">ม.1 ถึง ม.6</div>
+          </div>
+        </div>
+
+        <div class="kpi-card amber">
+          <div class="kpi-icon amber">👔</div>
+          <div class="kpi-content">
+            <div class="kpi-label">บุคลากร / ครู</div>
+            <div class="kpi-value" id="kpiStaff">0</div>
+            <div class="kpi-sub">ครูและเจ้าหน้าที่</div>
+          </div>
+        </div>
+
+        <div class="kpi-card red">
+          <div class="kpi-icon red">🩹</div>
+          <div class="kpi-content">
+            <div class="kpi-label">อาการที่พบบ่อยอันดับ 1</div>
+            <div class="kpi-value" id="kpiTopSymptom" style="font-size:1.35rem;">-</div>
+            <div class="kpi-sub" id="kpiTopSymptomSub">0 ราย</div>
+          </div>
+        </div>
+
+        <div class="kpi-card blue">
+          <div class="kpi-icon blue">🛏️</div>
+          <div class="kpi-content">
+            <div class="kpi-label">นอนพักห้องพยาบาล</div>
+            <div class="kpi-value" id="kpiBedRest">0</div>
+            <div class="kpi-sub">ได้รับการอนุญาตพักฟื้น</div>
+          </div>
+        </div>
+
+        <div class="kpi-card red">
+          <div class="kpi-icon red">🚑</div>
+          <div class="kpi-content">
+            <div class="kpi-label">นำส่งโรงพยาบาล</div>
+            <div class="kpi-value" id="kpiHospital">0</div>
+            <div class="kpi-sub">ส่งต่อรับการรักษา</div>
+          </div>
+        </div>
+
+        <div class="kpi-card teal">
+          <div class="kpi-icon teal">💊</div>
+          <div class="kpi-content">
+            <div class="kpi-label">จ่ายยาสามัญ</div>
+            <div class="kpi-value" id="kpiMedDispensed">0</div>
+            <div class="kpi-sub">ครั้งที่มีการจ่ายยา</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section (Offline Pure SVG) -->
+      <div class="charts-grid">
+        
+        <!-- แนวโน้มผู้ใช้บริการตามวัน/เดือน -->
+        <div class="chart-card col-8">
+          <div class="chart-card-header">
+            <div class="chart-card-title">
+              <span id="trendChartTitle">📈 แนวโน้มจำนวนผู้เข้าใช้บริการ</span>
+            </div>
+            <span id="trendChartSubtitle" style="font-size:0.8rem;color:var(--text-muted);">แกน Y: จำนวนครั้งที่มารับบริการ</span>
+          </div>
+          <div class="chart-box" id="trendChartContainer">
+            <!-- Rendered by SVG chart engine -->
+          </div>
+        </div>
+
+        <!-- สัดส่วนอาการเจ็บป่วยที่พบบ่อย -->
+        <div class="chart-card col-4">
+          <div class="chart-card-header">
+            <div class="chart-card-title">
+              <span>🩹 5 อาการเจ็บป่วยยอดนิยม</span>
+            </div>
+          </div>
+          <div class="chart-box" id="symptomChartContainer">
+            <!-- Donut Chart -->
+          </div>
+        </div>
+
+        <!-- สถิติตามระดับชั้น ม.1 - ม.6 และบุคลากร -->
+        <div class="chart-card col-12">
+          <div class="chart-card-header">
+            <div class="chart-card-title">
+              <span>🏫 สถิติเปรียบเทียบตามระดับชั้น (ม.1-ม.3 มี 6 ห้อง | ม.4-ม.6 มี 12 ห้อง)</span>
+            </div>
+          </div>
+          <div class="chart-box" id="gradeChartContainer">
+            <!-- Bar Chart -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ตารางสรุปเชิงลึกระดับชั้น -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📋 ตารางสรุปการให้บริการแยกรายระดับชั้น</span>
+          </div>
+        </div>
+        <div class="card-body" id="classSummaryTableContainer">
+          <!-- Summary Table -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================================
+         TAB 4: การจัดการและสำรองข้อมูล (Backup & Settings)
+         ====================================================================== -->
+    <section id="backup" class="tab-pane">
+      <div class="card">
+        <div class="card-header border-accent">
+          <div class="card-title">
+            <span>💾 การจัดการข้อมูลและความปลอดภัย</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:1.5rem;">
+            
+            <!-- การเชื่อมต่อ Cloudflare D1 Database & ซิงก์ข้อมูล -->
+            <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:1.25rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.5rem;">
+                <h4 style="color:#166534;margin:0;font-size:1.1rem;display:flex;align-items:center;gap:0.5rem;">
+                  <span>☁️ ฐานข้อมูลคลาวด์ Cloudflare D1</span>
+                  <span id="tabCloudStatusText" class="badge" style="background:#dcfce7;color:#15803d;font-size:0.8rem;">กำลังตรวจสอบ...</span>
+                </h4>
+                <div style="font-size:0.85rem;color:#15803d;">SQL Serverless Database</div>
+              </div>
+              <p style="color:#334155;font-size:0.92rem;margin-bottom:1rem;">
+                เมื่อเชื่อมต่อ Cloudflare D1 แล้ว ข้อมูลจะถูกจัดเก็บบนคลาวด์แบบ Real-time ช่วยให้สามารถใช้งานพร้อมกันได้หลายเครื่อง ทั้งคอมพิวเตอร์ห้องพยาบาล แท็บเล็ต หรือมือถือ และยังคงมีระบบสำรองข้อมูลในเครื่องอัตโนมัติ
+              </p>
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button class="btn btn-success" id="btnSyncToCloud">
+                  🔄 ซิงก์ข้อมูลในเครื่องขึ้น Cloudflare D1
+                </button>
+                <button class="btn btn-secondary" id="btnPullFromCloud">
+                  📥 โหลดข้อมูลจาก Cloudflare D1 ลงเครื่อง
+                </button>
+              </div>
+            </div>
+
+            <!-- ติดตั้งแอพพลิเคชันบนเดสก์ท็อป (Desktop App) -->
+            <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:1.25rem;">
+              <h4 style="color:#1e40af;margin-bottom:0.5rem;font-size:1.1rem;display:flex;align-items:center;gap:0.5rem;">
+                <span>🖥️ ติดตั้งเป็นแอปพลิเคชันหน้า Desktop</span>
+              </h4>
+              <p style="color:#334155;font-size:0.92rem;margin-bottom:1rem;">
+                ท่านสามารถเปิดใช้งานระบบในรูปแบบโปรแกรมเดสก์ท็อป (Standalone Window) ไร้แถบ URL กวนใจ เปิดได้รวดเร็วเหมือนโปรแกรมทั่วไป
+              </p>
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button class="btn btn-primary" id="btnTabInstallApp">
+                  📲 ติดตั้งแอปพลิเคชันลงเครื่อง
+                </button>
+                <a href="javascript:void(0)" class="btn btn-secondary" id="btnOpenDesktopGuide">
+                  📖 ดูวิธีเปิดไฟล์สร้างทางลัดบน Desktop
+                </a>
+              </div>
+            </div>
+
+            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:1.25rem;">
+              <h4 style="color:#1d4ed8;margin-bottom:0.5rem;font-size:1.1rem;">📥 สำรองข้อมูลเป็นไฟล์ (Export JSON)</h4>
+              <p style="color:#334155;font-size:0.92rem;margin-bottom:1rem;">
+                ดาวน์โหลดไฟล์สำรองข้อมูล (.json) เพื่อเก็บไว้ในเครื่องหรือ Flash Drive สำรองไว้เป็นประจำ
+              </p>
+              <button class="btn btn-primary" id="btnExportJson">
+                💾 ดาวน์โหลดไฟล์สำรองข้อมูล (.json)
+              </button>
+            </div>
+
+            <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:1.25rem;">
+              <h4 style="color:#1e293b;margin-bottom:0.5rem;font-size:1.1rem;">📤 กู้คืนข้อมูลจากไฟล์สำรอง (Restore)</h4>
+              <p style="color:#334155;font-size:0.92rem;margin-bottom:1rem;">
+                เลือกไฟล์สำรองข้อมูล (.json) ที่เคยดาวน์โหลดไว้ เพื่อนำข้อมูลทั้งหมดกลับเข้าสู่ระบบ
+              </p>
+              <input type="file" id="jsonFileInput" accept=".json" style="display:none;">
+              <button class="btn btn-secondary" id="btnImportJson">
+                📂 เลือกไฟล์สำรองเพื่อกู้คืนข้อมูล
+              </button>
+            </div>
+
+            <div style="background:#fefce8;border:1px solid #fde047;border-radius:12px;padding:1.25rem;">
+              <h4 style="color:#854d0e;margin-bottom:0.5rem;font-size:1.1rem;">🧪 ข้อมูลตัวอย่างสำหรับทดสอบระบบ (Demo Data)</h4>
+              <p style="color:#334155;font-size:0.92rem;margin-bottom:1rem;">
+                หากต้องการดูตัวอย่างกราฟและสถิติ ท่านสามารถกดปุ่มเพื่อเพิ่มข้อมูลจำลองของนักเรียน ม.1 - ม.6 และบุคลากรได้ทันที
+              </p>
+              <button class="btn btn-accent" id="btnLoadDemoData">
+                ✨ โหลดข้อมูลตัวอย่างเพิ่มเติม
+              </button>
+            </div>
+
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:1.25rem;">
+              <h4 style="color:#dc2626;margin-bottom:0.5rem;font-size:1.1rem;">⚠️ ล้างข้อมูลทั้งหมดในระบบ</h4>
+              <p style="color:#334155;font-size:0.92rem;margin-bottom:1rem;">
+                การกดปุ่มนี้จะลบรายการบันทึกทั้งหมดออกจากระบบ โปรดสำรองข้อมูลก่อนทำรายการ
+              </p>
+              <button class="btn btn-danger" id="btnClearAllData">
+                🗑️ ล้างข้อมูลทั้งหมด
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       MODAL: ดูรายละเอียดรายการ + พิมพ์ใบรับรอง
+       ======================================================================== -->
+  <div class="modal-overlay" id="viewModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title">📄 รายละเอียดการรับบริการ</div>
+        <button class="modal-close" onclick="closeModal('viewModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="viewModalBody">
+        <!-- Content injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('viewModal')">ปิด</button>
+        <button class="btn btn-primary" id="btnModalPrintSlip">
+          🖨️ พิมพ์ใบรับรองการนอนพัก / บันทึก
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: แก้ไขข้อมูลบันทึก
+       ======================================================================== -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-dialog" style="max-width:700px;">
+      <div class="modal-header">
+        <div class="modal-title">✏️ แก้ไขข้อมูลการรับบริการ</div>
+        <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label">วันที่และเวลา</label>
+              <input type="datetime-local" id="editVisitDatetime" class="form-control">
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label">ประเภทผู้รับบริการ</label>
+              <div class="type-segmented-control">
+                <label class="type-option">
+                  <input type="radio" name="editUserType" value="student">
+                  <span>นักเรียน</span>
+                </label>
+                <label class="type-option">
+                  <input type="radio" name="editUserType" value="staff">
+                  <span>บุคลากร</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-8">
+            <div class="form-group">
+              <label class="form-label">ชื่อ - นามสกุล</label>
+              <input type="text" id="editFullName" class="form-control">
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="form-group">
+              <label class="form-label">เพศ</label>
+              <select id="editGender" class="form-select">
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+                <option value="ไม่ระบุ">ไม่ระบุ</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- นักเรียน -->
+          <div class="col-12" id="editStudentFieldsBox">
+            <div class="form-grid">
+              <div class="col-4">
+                <div class="form-group">
+                  <label class="form-label">ระดับชั้น</label>
+                  <select id="editStudentGrade" class="form-select">
+                    <option value="ม.1">ม.1</option>
+                    <option value="ม.2">ม.2</option>
+                    <option value="ม.3">ม.3</option>
+                    <option value="ม.4">ม.4</option>
+                    <option value="ม.5">ม.5</option>
+                    <option value="ม.6">ม.6</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group">
+                  <label class="form-label">ห้อง</label>
+                  <select id="editStudentRoom" class="form-select"></select>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="form-group">
+                  <label class="form-label">เลขที่</label>
+                  <input type="number" id="editStudentNo" class="form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- บุคลากร -->
+          <div class="col-12" id="editStaffFieldsBox" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">ตำแหน่ง / กลุ่มสาระฯ</label>
+              <input type="text" id="editStaffPosition" class="form-control">
+            </div>
+          </div>
+
+          <div class="col-8">
+            <div class="form-group">
+              <label class="form-label">อาการเจ็บป่วย</label>
+              <input type="text" id="editSymptoms" class="form-control">
+            </div>
+          </div>
+
+          <!-- สัญญาณชีพ edit modal -->
+          <div class="col-12">
+            <div class="vitals-section">
+              <div class="vitals-title">🩺 สัญญาณชีพ (Vital Signs)</div>
+              <div class="form-grid">
+                <div class="col-4">
+                  <div class="form-group">
+                    <label class="form-label">💉 ความดันโลหิต (mmHg)</label>
+                    <input type="text" id="editVitalBp" class="form-control" placeholder="เช่น 120/80">
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label class="form-label">❤️ ชีพจร (ครั้ง/นาที)</label>
+                    <input type="number" id="editVitalHr" class="form-control" placeholder="เช่น 80">
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label class="form-label">🫧 SpO2 (%)</label>
+                    <input type="number" id="editVitalSpo2" class="form-control" placeholder="เช่น 98">
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label class="form-label">🌬️ การหายใจ (ครั้ง/นาที)</label>
+                    <input type="number" id="editVitalRr" class="form-control" placeholder="เช่น 18">
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label class="form-label">🌡️ อุณหภูมิ (°C)</label>
+                    <input type="number" step="0.1" id="editTemperature" class="form-control" placeholder="เช่น 36.5">
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="form-group">
+                    <label class="form-label">🩸 ระดับน้ำตาล (mg/dL)</label>
+                    <input type="number" id="editVitalDtx" class="form-control" placeholder="เช่น 95">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label">การรักษา / ปฐมพยาบาล</label>
+              <input type="text" id="editTreatment" class="form-control">
+              <div class="tag-container mt-1">
+                <span class="quick-tag tag-teal btn-sm" onclick="appendOrToggleInput(document.getElementById('editTreatment'), 'ให้นอนพักห้องพยาบาล', this)">ให้นอนพัก</span>
+                <span class="quick-tag tag-teal btn-sm" onclick="appendOrToggleInput(document.getElementById('editTreatment'), 'ทำแผล / ล้างแผล / ทายา', this)">ทำแผล</span>
+                <span class="quick-tag tag-secondary btn-sm" onclick="appendOrToggleInput(document.getElementById('editTreatment'), 'นำส่งโรงพยาบาล', this)">🚑 นำส่งโรงพยาบาล</span>
+                <span class="quick-tag tag-teal btn-sm" onclick="appendOrToggleInput(document.getElementById('editTreatment'), 'ประสานงานผู้ปกครอง', this)">ติดต่อผู้ปกครอง</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label">การจ่ายยา</label>
+              <input type="text" id="editMedication" class="form-control">
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label">ผู้บันทึก</label>
+              <input type="text" id="editRecordBy" class="form-control">
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="form-group">
+              <label class="form-label">หมายเหตุเพิ่มเติม</label>
+              <input type="text" id="editNotes" class="form-control">
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('editModal')">ยกเลิก</button>
+        <button class="btn btn-primary" onclick="saveEditedRecord()">บันทึกการแก้ไข</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       PRINT AREA: บริเวณสำหรับการพิมพ์ (ซ่อนไว้และจะแสดงเฉพาะเวลาสั่งพิมพ์)
+       ======================================================================== -->
+  <div id="printArea" class="print-area">
+    <!-- Populated dynamically during printSlip or printStatsReport -->
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets/chart-engine.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
